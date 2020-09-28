@@ -1,6 +1,6 @@
 -module(jwerl).
 
--export([sign/1, sign/2, sign/3,
+-export([sign/1, sign/2, sign/4,
          verify/1, verify/2, verify/3, verify/4, verify/5,
          header/1]).
 
@@ -18,11 +18,11 @@
 % @equiv sign(Data, hs256, <<"">>)
 -spec sign(Data :: map()) -> binary().
 sign(Data) ->
-    sign(Data, hs256, <<"">>).
+    sign(Data, #{}, hs256, <<"">>).
 % @equiv sign(Data, Algorithm, <<"">>)
 -spec sign(Data :: map(), Algorithm :: algorithm()) -> binary().
 sign(Data, Algorithm) ->
-    sign(Data, Algorithm, <<"">>).
+    sign(Data, #{}, Algorithm, <<"">>).
 % @doc
 % Sign <tt>Data</tt> with the given <tt>Algorithm</tt> and <tt>KeyOrPem</tt>.
 %
@@ -42,9 +42,9 @@ sign(Data, Algorithm) ->
 % Token = jwerl:sign(#{key =&gt; &lt;&lt;"Hello World"&gt;&gt;}, hs256, &lt;&lt;"s3cr3t k3y"&gt;&gt;).
 % </pre>
 % @end
--spec sign(Data :: map() | list(), Algorithm :: algorithm(), KeyOrPem :: binary()) -> binary().
-sign(Data, Algorithm, KeyOrPem) when (is_map(Data) orelse is_list(Data)), is_atom(Algorithm), is_binary(KeyOrPem) ->
-    encode(jsx:encode(Data), config_headers(#{alg => algorithm_to_binary(Algorithm)}), KeyOrPem).
+-spec sign(Data :: map() | list(), AdditionalHeaders :: map(), Algorithm :: algorithm(), KeyOrPem :: binary()) -> binary().
+sign(Data, AdditionalHeaders, Algorithm, KeyOrPem) when (is_map(Data) orelse is_list(Data)), is_map(AdditionalHeaders), is_atom(Algorithm), is_binary(KeyOrPem) ->
+    encode(jsx:encode(Data), config_headers(AdditionalHeaders#{alg => algorithm_to_binary(Algorithm)}), KeyOrPem).
 
 % @equiv verify(Data, <<"">>, hs256, #{}, #{})
 verify(Data) ->
